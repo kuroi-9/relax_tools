@@ -19,12 +19,12 @@ analyse(){
 			echo "jump in $something"
 			analyse "$something"
 		else
-			mkdir ~/Musique/test_a/"$1" > /dev/null 2>&1;
+			mkdir ~/Musique/test_e/"$1" > /dev/null 2>&1;
 			
-			filename=$(basename "$something")
-			extension=${filename##*.}
-			basename="${filename%.*}"
-			echo "[WORKING COMPRESSION] converting $something ..."
+			#filename=$(basename "$something")
+			#extension=${filename##*.}
+			#basename="${filename%.*}"
+			echo "[WORKING EQ] converting $something ..."
 			
 			#oggenc "$something" --bitrate 320 -o ~/Musique/test_a/"$1"/"$something" > /dev/null 2>&1;
 			##mkdir "~/Musique/test_a/$1/"  > /dev/null 2>&1;
@@ -52,14 +52,14 @@ analyse(){
 
 			#vorbiscomment -w -R -c ~/Musique/test_a/"$1"/"temp_$something".ogg.tags ~/Musique/test_a/"$1"/"$basename".ogg
 
-			ffmpeg -i "$something" -map_channel 0.0.0 left.flac -map_channel 0.0.1 right.flac -y > /dev/null 2>&1;
-			ffmpeg -i left.flac -af "acompressor=mode=upward:threshold=1:ratio=4:1:attack=3:release=350:knee=4" 
+			#ffmpeg -i "$something" -map_channel 0.0.0 left.flac -map_channel 0.0.1 right.flac -y > /dev/null 2>&1;
+			#ffmpeg -i left.flac -af "acompressor=mode=upward:threshold=1:ratio=4:1:attack=3:release=350:knee=4" 
 
 			
-			rm "/home/loicd/Musique/test_a/$1/FRONT_COVER.jpg" > /dev/null 2>&1;
-			rm "/home/loicd/Musique/test_a/$1/FRONT_COVER.base64" > /dev/null 2>&1;
+			#rm "/home/loicd/Musique/test_a/$1/FRONT_COVER.jpg" > /dev/null 2>&1;
+			#rm "/home/loicd/Musique/test_a/$1/FRONT_COVER.base64" > /dev/null 2>&1;
 			#rm "/home/loicd/Musique/test_a/$1/metadata.dat"
-			rm "/home/loicd/Musique/test_a/$1/temp_$something.ogg.tags" > /dev/null 2>&1;
+			#rm "/home/loicd/Musique/test_a/$1/temp_$something.ogg.tags" > /dev/null 2>&1;
 			
 
 			
@@ -78,8 +78,6 @@ analyse(){
 			#ffmpeg -i right.flac -af "equalizer=f=4550:t=h:w=1134:g=-2,equalizer=f=4900:t=h:w=1134:g=-1,equalizer=f=18058:t=h:w=4142:g=-1.42" righte.flac -y > /dev/null 2>&1;
 			
 			#fmpeg -i "$something" -af "equalizer=f=20:t=h:w=4.6:g=-4:c=0,equalizer=f=24:t=h:w=5.5:g=-1.5:c=0,equalizer=f=27:t=h:w=6.1:g=-3:c=0,equalizer=f=36.5:t=h:w=8.4:g=-2:c=0,equalizer=f=460:t=h:w=105:g=-0.5:c=0,equalizer=f=571:t=h:w=131:g=-1:c=0,equalizer=f=709:t=h:w=162:g=-1:c=0,equalizer=f=879:t=h:w=201:g=-0.85:c=0,equalizer=f=1091:t=h:w=250:g=-0.6:c=0,equalizer=f=1354:t=h:w=311:g=-0.45:c=0,equalizer=f=3200:t=h:w=737:g=-0.95:c=0,equalizer=f=4000:t=h:w=914:g=-0.95:c=0,equalizer=f=5650:t=h:w=914:g=-1:c=0,equalizer=f=9400:t=h:w=2167:g=-1:c=0,equalizer=f=10400:t=h:w=2167:g=-1.7:c=0,equalizer=f=11727:t=h:w=2690:g=-3:c=0,equalizer=f=13000:t=h:w=2690:g=-2:c=0,equalizer=f=4550:t=h:w=1134:g=-2:c=1,equalizer=f=4900:t=h:w=1134:g=-1:c=1,equalizer=f=18058:t=h:w=4142:g=-1.42:c=1" ~/Musique/test_a/"$1"/"$something" -y > /dev/null 2>&1;
-			
-			
 			
 			#ffmpeg -i left.flac -af "firequalizer=gain_entry='entry(20,-4); entry(24, -1.5); entry(27, -3); entry(36, -2); entry(500, -1.1); entry(600, -1.1); entry(700, -0.75); entry(800, -0.5); entry(900, -0.4); entry(3000, -1); entry(4000, -1); entry(10000, -1); entry(12000, -3); entry(13000, -2); entry(18000, -1)'" lefte.flac
 			#ffmpeg -i right.flac -af crystalizer=i=-1.23 righte.flac -y > /dev/null 2>&1; # Baisser un peu, vers 27-28
@@ -100,7 +98,10 @@ analyse(){
 			#--af=lavfi="[crossfeed=strength=0.3:range=1:slope=0.5:level_in=0.9:level_out=1]",lavfi="[adelay=0|0.05]"
 			#ffmpeg -i "$something" -af "adelay=0|0.12" mied.flac -y > /dev/null 2>&1;
 			#ffmpeg -i "$something" -af "crossfeed" ~/Musique/test_a/"$1"/"$something" -y > /dev/null 2>&1;
-			#ffmpeg -i "$something" -af acontrast=100 ~/Musique/test_a/"$1"/"$something" -y > /dev/null 2>&1;
+			#ffmpeg -i "$something" -af acontrast=100 ~/Musique/test_a/"$1"/"$something" -y > /dev/null 2>&1;*
+			ffmpeg -i "$something" -af "equalizer=f=11000:t=q:w=1.833:g=-5.37:c=0, equalizer=f=14000:t=q:w=7:g=-1.34:c=0" ~/Musique/test_e/"$1"/"$something" -y > /dev/null 2>&1;
+			
+			#ffmpeg -i "$something" -af "equalizer=f=7392:t=q:w=2.49:g=0 :c=1,equalizer=f=11098:t=q:w=4.49:g=8:c=1,equalizer=f=15000:t=q:w=2.49:g=0:c=1" ~/Musique/test_c/"$1"/"$something" -y > /dev/null 2>&1;
 			
 			rm left.flac > /dev/null 2>&1;
 			rm righte.flac > /dev/null 2>&1;
@@ -108,7 +109,7 @@ analyse(){
 			rm lefte.flac > /dev/null 2>&1;
 			rm mied.flac > /dev/null 2>&1;
 			rm miede.flac > /dev/null 2>&1;
-			rm ~/Musique/test_a/"$1"/miede.flac > /dev/null 2>&1;
+			rm ~/Musique/test_b/"$1"/miede.flac > /dev/null 2>&1;
 		fi
 	done
 	cd ../

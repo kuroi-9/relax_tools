@@ -12,6 +12,7 @@ echo "Vérification des sous-titres à ajouter"
 for video in source_videos/*;
 do
 	mkvextract tracks "$video" "$1":renamed_subs/"$generalCount".ass
+	#rm "$video"
 	
 	generalCount=$((generalCount+1))
 done

@@ -21,7 +21,7 @@ processedFiles=0
 workingDir=$(pwd)
 history=()
 
-echo -e "------- $processedFiles sur $filesCount ------------------------------------------------------------------------"
+echo -e "------- $processedFiles sur $filesCount -------------------------------------------------------------------"
 
 # Processes all .cbz files of the current directory
 for cbz in *.cbz;
@@ -53,40 +53,34 @@ do
 		cd "${cbz%.*}"
 		cd * > /dev/null 2>&1
 		cd * > /dev/null 2>&1
+		mkdir ~/Documents/to_upscale/"${PWD##*/}" && mv * ~/Documents/to_upscale/"${PWD##*/}"
 		
-		# Starting subprocess and get it's return value
-		echo -ne "[`date`] ${cbz%.*}\r" && echo ""
-		upscale_esr_10092023.sh nt &
-		pid=$!
-		wait $pid
-		doneWithErrors=$?
+		# preparing directory
+		cd ~/Documents/to_upscale/"${PWD##*/}"
+		for picture in *;
+		do
+			filename=$(basename "$picture")
+			extension=${filename##*.}
+			basename="${filename%.*}"
+			
+			file=~/Documents/upscale_out/"${PWD##*/}"/"$basename".jpg
+			
+			# Do not processes upscale if output file already exists
+			if [ -f "$file" ]; then
+				echo -e "${GRAY}$file exists, skipping${NC}\r"
+				rm "$picture"
+			fi
 		
-		# Create different filename for alarming and $history purposes
-		if [ "$doneWithErrors" -eq 1 ];
-		then
-			zip -r "$workingDir"/out/"$basename"_potential_errors.cbz upscaled_pics/ > /dev/null 2>&1
-		else
-			zip -r "$workingDir"/out/"$cbz" upscaled_pics/ > /dev/null 2>&1
-		fi
-
+		# running chainner
+		
+		
 		cd "$workingDir"
 		rm -rf "${cbz%.*}"
-			
-		# History managing
-		if [ -f "$file".cbz -a "$doneWithErrors" -eq 0 ];
-		then
-			processedFiles=$((processedFiles + 1))
-			history+=("${GREEN}[`date`] ${cbz%.*} \u2714${NC}\r")
-		elif [ -f "$file"_potential_errors.cbz -a "$doneWithErrors" -eq 1 ];
-		then
-			processedFiles=$((processedFiles + 1))
-			history+=("${RED}[`date`] ${cbz%.*} \u2718${NC}\r")
-		fi
 	fi
 	
 	# Display history at each iteration (= .cbz)
 	clear
-	echo -e "------- $processedFiles sur $filesCount ------------------------------------------------------------------------"
+	echo -e "------- $processedFiles sur $filesCount -------------------------------------------------------------------"
 	for value in "${history[@]}"
 	do	
 		echo -e $value

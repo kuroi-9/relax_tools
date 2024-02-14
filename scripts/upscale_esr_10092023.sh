@@ -14,6 +14,36 @@ function cleanup() {
 trap cleanup EXIT
 tput civis
 
+# Starting subprocess and get it's return value
+		echo -ne "[`date`] ${cbz%.*}\r" && echo ""
+		upscale_esr_10092023.sh nt &
+		pid=$!
+		wait $pid
+		doneWithErrors=$?
+		
+		# Create different filename for alarming and $history purposes
+		if [ "$doneWithErrors" -eq 1 ];
+		then
+			zip -r "$workingDir"/out/"$basename"_potential_errors.cbz upscaled_pics/ > /dev/null 2>&1
+		else
+			zip -r "$workingDir"/out/"$cbz" upscaled_pics/ > /dev/null 2>&1
+		fi
+
+		cd "$workingDir"
+		rm -rf "${cbz%.*}"
+			
+		# History managing
+		if [ -f "$file".cbz -a "$doneWithErrors" -eq 0 ];
+		then
+			processedFiles=$((processedFiles + 1))
+			history+=("${GREEN}[`date`] ${cbz%.*} \u2714${NC}\r")
+		elif [ -f "$file"_potential_errors.cbz -a "$doneWithErrors" -eq 1 ];
+		then
+			processedFiles=$((processedFiles + 1))
+			history+=("${RED}[`date`] ${cbz%.*} \u2718${NC}\r")
+		fi
+
+
 # Newbie trap
 if [ "$1" = "" ]
 then
