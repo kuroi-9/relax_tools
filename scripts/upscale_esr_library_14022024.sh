@@ -41,6 +41,8 @@ filesCount=$(ls | grep '.cbz' | wc -l)
 processedFiles=0
 workingDir=$(pwd)
 history=()
+diskUsableSpace=$(df --output=avail . | sed 1d)
+diskUsedSpace=$(du -s . | cut -d '    ' -f 1)
 
 echo -e "|--------------------- $processedFiles of $filesCount ----------------------vPinkValentine"
 
@@ -50,6 +52,7 @@ do
 	filename=$(basename "$cbz")
 	extension=${filename##*.}
 	basename="${filename%.*}"
+	fileSize=$(ls -l $cbz | cut -d ' ' -f 5)
 	
 	mkdir "${cbz%.*}" >/dev/null 2>&1
 	file=out/"$basename"	
@@ -71,132 +74,136 @@ do
 		clear
 	else
 		echo -ne "[`date`] ${cbz%.*}\r" && echo ""
-		unzip -o "$cbz" -d "${cbz%.*}" > /dev/null 2>&1
-		cd "${cbz%.*}"
-		mkdir ci_temp
-		find . \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' \) -print0 | xargs -0 cp -t ci_temp
-		cd ci_temp
-		cg_path=$(dirname "${PWD}")
-		#rm -rf ~/Documents/to_upscale/* > /dev/null 2>&1
-		file_count=$(ls -1 | wc -l)
-		mkdir ~/Documents/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
-		cd .. && rm -rf ../"${cbz%.*}"
-		
-		# preparing directory
-		cd ~/Documents/to_upscale/"${PWD##*/}"
-		
-		if [ -d ~/Documents/upscale_out/"${PWD##*/}" ];
-		then
-			for picture in *;
+		if [ $((diskUsableSpace - diskUsedSpace)) -lt $fileSize ]
+			unzip -o "$cbz" -d "${cbz%.*}" > /dev/null 2>&1
+			cd "${cbz%.*}"
+			mkdir ci_temp
+			find . \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' \) -print0 | xargs -0 cp -t ci_temp
+			cd ci_temp
+			cg_path=$(dirname "${PWD}")
+			#rm -rf ~/Documents/to_upscale/* > /dev/null 2>&1
+			file_count=$(ls -1 | wc -l)
+			mkdir ~/Documents/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
+			cd .. && rm -rf ../"${cbz%.*}"
+			
+			# preparing directory
+			cd ~/Documents/to_upscale/"${PWD##*/}"
+			
+			if [ -d ~/Documents/upscale_out/"${PWD##*/}" ];
+			then
+				for picture in *;
+				do
+					sub_filename=$(basename "$picture")
+					sub_extension=${sub_filename##*.}
+					sub_basename="${sub_filename%.*}"
+					
+					upscaled_file=~/Documents/upscale_out/"${PWD##*/}"/"$sub_basename".jpg
+					
+					# Do not processes upscale if output file already exists
+					if [ -f "$upscaled_file" ]; 
+					then
+						#TODO CHECK IF BETTER WAY TO DISPLAY ALREADY UPSCALED PICS
+						#echo -e "${GRAY}$upscaled_file exists, skipping${NC}\r"
+						rm "$picture"
+					fi
+				done
+			else
+				mkdir ~/Documents/upscale_out/"${PWD##*/}" > /dev/null 2>&1
+			fi
+
+			# preparing the input/output for chainner
+			inputs_json=$(cat ~/relax_tools/scripts/upscale_esr_library_14022024_inputs.json)
+			updated_json=$(echo "$inputs_json" | jq --arg source_pics_dir "${PWD}" '.inputs["#18df0f63-9e9d-4569-acc9-0e4679ae6523:0"] = $source_pics_dir')
+			final_json=$(echo "$updated_json" | jq --arg output_subdir "${PWD##*/}" '.inputs["#506a4ff2-b61b-4f12-a198-36f0fa28e94c:2"] = $output_subdir')
+			echo $final_json > ~/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json
+			
+			# running chainner
+			~/Téléchargements/chaiNNer-linux-x64-0.20.2/chaiNNer-linux-x64/./chainner run ~/Documents/upchain  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
+			pid=$!
+			
+			# beautiful declaration UwU
+			spinner="/-\\|"
+			
+			processing_time=0
+			last_processed_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
+			average_processing_time=0
+			total_processing_time=0
+			current_processed_file_count=0
+			estimated_remaining_time=0
+			
+			while true; 
 			do
-				sub_filename=$(basename "$picture")
-				sub_extension=${sub_filename##*.}
-				sub_basename="${sub_filename%.*}"
+				processed_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
+				remaining_files=$((file_count - processed_file_count))
 				
-				upscaled_file=~/Documents/upscale_out/"${PWD##*/}"/"$sub_basename".jpg
-				
-				# Do not processes upscale if output file already exists
-				if [ -f "$upscaled_file" ]; 
+				if [ "$processed_file_count" -gt "$last_processed_file_count" ];
 				then
-					#TODO CHECK IF BETTER WAY TO DISPLAY ALREADY UPSCALED PICS
-					#echo -e "${GRAY}$upscaled_file exists, skipping${NC}\r"
-					rm "$picture"
+					last_processed_file_count=$processed_file_count
+					current_processed_file_count=$((current_processed_file_count + 1))
+					total_processing_time=$((total_processing_time + processing_time))
+					average_processing_time=$((total_processing_time / current_processed_file_count))
+					processing_time=0
+					
+					estimated_remaining_time=$((remaining_files * average_processing_time))
+					current_time=$(date +%s)
+					end_time=$((current_time + estimated_remaining_time + 60))
+					end_time_formatted=$(date -d @$end_time +"%H:%M")
 				fi
-			done
-		else
-			mkdir ~/Documents/upscale_out/"${PWD##*/}" > /dev/null 2>&1
-		fi
 
-		# preparing the input/output for chainner
-		inputs_json=$(cat ~/relax_tools/scripts/upscale_esr_library_14022024_inputs.json)
-		updated_json=$(echo "$inputs_json" | jq --arg source_pics_dir "${PWD}" '.inputs["#18df0f63-9e9d-4569-acc9-0e4679ae6523:0"] = $source_pics_dir')
-		final_json=$(echo "$updated_json" | jq --arg output_subdir "${PWD##*/}" '.inputs["#506a4ff2-b61b-4f12-a198-36f0fa28e94c:2"] = $output_subdir')
-		echo $final_json > ~/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json
-		
-		# running chainner
-		~/Téléchargements/chaiNNer-linux-x64-0.20.2/chaiNNer-linux-x64/./chainner run ~/Documents/upchain  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
-		pid=$!
-		
-		# beautiful declaration UwU
-		spinner="/-\\|"
-		
-		processing_time=0
-		last_processed_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
-		average_processing_time=0
-		total_processing_time=0
-		current_processed_file_count=0
-		estimated_remaining_time=0
-		
-		while true; 
-		do
-		    processed_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
-			remaining_files=$((file_count - processed_file_count))
-			
-			if [ "$processed_file_count" -gt "$last_processed_file_count" ];
-			then
-				last_processed_file_count=$processed_file_count
-				current_processed_file_count=$((current_processed_file_count + 1))
-				total_processing_time=$((total_processing_time + processing_time))
-				average_processing_time=$((total_processing_time / current_processed_file_count))
-				processing_time=0
+				echo -ne "	Running... [${GREEN}$processed_file_count${NC}/$file_count][ETA => ${GREEN}$([[ $end_time_formatted = "" ]] && echo "${RED}... ${NC}" || echo "$end_time_formatted")${NC}]\r"
+
+				printf "[%c] " "${spinner:SECONDS % ${#spinner}:1}" 
+
+				if ! ps -p $pid > /dev/null; 
+				then
+					break
+				fi
 				
-				estimated_remaining_time=$((remaining_files * average_processing_time))
-				current_time=$(date +%s)
-				end_time=$((current_time + estimated_remaining_time + 60))
-				end_time_formatted=$(date -d @$end_time +"%H:%M")
-			fi
+				processing_time=$((processing_time + 1))
+				sleep 1
+			done
 
-		    echo -ne "	Running... [${GREEN}$processed_file_count${NC}/$file_count][ETA => ${GREEN}$([[ $end_time_formatted = "" ]] && echo "${RED}... ${NC}" || echo "$end_time_formatted")${NC}]\r"
-
-			printf "[%c] " "${spinner:SECONDS % ${#spinner}:1}" 
-
-		    if ! ps -p $pid > /dev/null; 
-		    then
-				break
-		    fi
-		    
-			processing_time=$((processing_time + 1))
-		    sleep 1
-		done
-
-		end_time_formatted=""
-		doneWithErrors=$?
-		out_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
-		
-		# Create different filename for alarming and $history purposes
-		if [ "$out_file_count" -eq "$file_count" -o "$out_file_count" -eq $((file_count - 1)) ];
-		then
-			zip -r "$workingDir"/out/"$cbz" ~/Documents/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
-			if [ -f "$workingDir"/out/"$cbz" ];
+			end_time_formatted=""
+			doneWithErrors=$?
+			out_file_count=$(ls -1 ~/Documents/upscale_out/"${PWD##*/}"/ | wc -l)
+			
+			# Create different filename for alarming and $history purposes
+			if [ "$out_file_count" -eq "$file_count" -o "$out_file_count" -eq $((file_count - 1)) ];
 			then
-				echo "zip process success"
+				zip -r "$workingDir"/out/"$cbz" ~/Documents/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
+				if [ -f "$workingDir"/out/"$cbz" ];
+				then
+					echo "zip process success"
+				else
+					echo "${RED}zip process failed, enough disk space ?${NC}"
+				fi
 			else
-				echo "${RED}zip process failed, enough disk space ?${NC}"
+				zip -r "$workingDir"/out/"$basename"_potential_errors.cbz ~/Documents/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
+				if [ -f "$workingDir"/out/"$basename"_potential_errors.cbz ];
+				then
+					echo "zip process success"
+				else
+					echo "${RED}zip process failed, enough disk space ?${NC}"
+				fi
+			fi
+			
+			cd "$workingDir"
+			rm -rf ~/Documents/to_upscale/"${PWD##*/}"
+			rm -rf "${cbz%.*}"
+				
+			# History managing
+			clear
+			if [ -f "$file".cbz -a \( "$out_file_count" -eq $file_count -o "$out_file_count" -eq $((file_count - 1)) \) ];
+			then
+				processedFiles=$((processedFiles + 1))
+				history+=("| ${GREEN}[`date`] ${cbz%.*} \u2714${NC}\r")
+			elif [ -f "$file"_potential_errors.cbz -a \( "$out_file_count" -eq $file_count -o "$out_file_count" -eq $((file_count - 1)) \) ];
+			then
+				processedFiles=$((processedFiles + 1))
+				history+=("${RED}[`date`] ${cbz%.*} \u2718 [$file_count/$out_file_count]${NC}\r")
 			fi
 		else
-			zip -r "$workingDir"/out/"$basename"_potential_errors.cbz ~/Documents/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
-			if [ -f "$workingDir"/out/"$basename"_potential_errors.cbz ];
-			then
-				echo "zip process success"
-			else
-				echo "${RED}zip process failed, enough disk space ?${NC}"
-			fi
-		fi
-		
-		cd "$workingDir"
-		rm -rf ~/Documents/to_upscale/"${PWD##*/}"
-		rm -rf "${cbz%.*}"
-			
-		# History managing
-		clear
-		if [ -f "$file".cbz -a \( "$out_file_count" -eq $file_count -o "$out_file_count" -eq $((file_count - 1)) \) ];
-		then
-			processedFiles=$((processedFiles + 1))
-			history+=("| ${GREEN}[`date`] ${cbz%.*} \u2714${NC}\r")
-		elif [ -f "$file"_potential_errors.cbz -a \( "$out_file_count" -eq $file_count -o "$out_file_count" -eq $((file_count - 1)) \) ];
-		then
-			processedFiles=$((processedFiles + 1))
-			history+=("${RED}[`date`] ${cbz%.*} \u2718 [$file_count/$out_file_count]${NC}\r")
+			echo "${RED}Not enough disk space to continue${NC}"
 		fi
 	fi
 	
