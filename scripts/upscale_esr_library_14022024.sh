@@ -41,8 +41,9 @@ filesCount=$(ls | grep '.cbz' | wc -l)
 processedFiles=0
 workingDir=$(pwd)
 history=()
-diskUsableSpace=$(df --output=avail . | sed 1d)
-diskUsedSpace=$(du -s . | cut -d '    ' -f 1)
+diskUsableSpace=$(df --output=avail --block-size=1024 . | sed 1d)
+diskUsedSpace=0
+notEnoughSpace=false
 
 echo -e "|--------------------- $processedFiles of $filesCount ----------------------vPinkValentine"
 
@@ -52,7 +53,13 @@ do
 	filename=$(basename "$cbz")
 	extension=${filename##*.}
 	basename="${filename%.*}"
-	fileSize=$(ls -l $cbz | cut -d ' ' -f 5)
+	diskUsableSpace=$(df --output=avail --block-size=1024 . | sed 1d)
+	fileSize=$(ls -l --block-size=1024 "$cbz" | cut -d ' ' -f 5)
+	
+	if [ -d ~/Documents/upscale_out/"${cbz%.*}" ];
+	then
+		diskUsedSpace=$(du -s ~/Documents/upscale_out/"${cbz%.*}" | cut -d '/' -f 1)
+	fi
 	
 	mkdir "${cbz%.*}" >/dev/null 2>&1
 	file=out/"$basename"	
@@ -74,7 +81,8 @@ do
 		clear
 	else
 		echo -ne "[`date`] ${cbz%.*}\r" && echo ""
-		if [ $((diskUsableSpace - diskUsedSpace)) -lt $fileSize ]
+		if [ $((fileSize * 35 - diskUsedSpace)) -gt 0 -a $diskUsableSpace -gt $((fileSize * 35 - diskUsedSpace)) ];
+		then
 			unzip -o "$cbz" -d "${cbz%.*}" > /dev/null 2>&1
 			cd "${cbz%.*}"
 			mkdir ci_temp
@@ -187,9 +195,9 @@ do
 				fi
 			fi
 			
-			cd "$workingDir"
 			rm -rf ~/Documents/to_upscale/"${PWD##*/}"
 			rm -rf "${cbz%.*}"
+			cd "$workingDir"
 				
 			# History managing
 			clear
@@ -203,16 +211,23 @@ do
 				history+=("${RED}[`date`] ${cbz%.*} \u2718 [$file_count/$out_file_count]${NC}\r")
 			fi
 		else
-			echo "${RED}Not enough disk space to continue${NC}"
+			rm -rf "${cbz%.*}"
+			history+=("${RED}Not enough disk space to continue [$(( (fileSize * 35 - diskUsedSpace - diskUsableSpace) / 1024))MB required]. Abording.${NC}")
+			notEnoughSpace=true
 		fi
 	fi
 	
 	# Display history at each iteration (= .cbz)
+	clear
 	echo -e "|--------------------- $processedFiles of $filesCount ----------------------vPinkValentine"
 	for value in "${history[@]}"
 	do	
 		echo -e $value
 	done
+	if [ "$notEnoughSpace" = true ];
+	then
+		break
+	fi
 done
 
 #systemctl suspend
