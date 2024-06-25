@@ -4,7 +4,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 GRAY='\033[0;90m'
 NC='\033[0m'
-export DISPLAY=$HOST_IP:1
+#export DISPLAY=$HOST_IP:1
 
 function cleanup() {
     tput cnorm
@@ -121,12 +121,12 @@ do
 
 			# preparing the input/output for chainner
 			inputs_json=$(cat ~/relax_tools/scripts/upscale_esr_library_14022024_inputs.json)
-			updated_json=$(echo "$inputs_json" | jq --arg source_pics_dir "${PWD}" '.inputs["#18df0f63-9e9d-4569-acc9-0e4679ae6523:0"] = $source_pics_dir')
-			final_json=$(echo "$updated_json" | jq --arg output_subdir "${PWD##*/}" '.inputs["#506a4ff2-b61b-4f12-a198-36f0fa28e94c:2"] = $output_subdir')
+			updated_json=$(echo "$inputs_json" | jq --arg source_pics_dir "${PWD}" '.inputs["#7b571afb-67e4-47f3-a412-4209c77ee8db:0"] = $source_pics_dir')
+			final_json=$(echo "$updated_json" | jq --arg output_subdir "${PWD##*/}" '.inputs["#f7235232-fc28-4eae-aa73-b4425e2d4b9b:2"] = $output_subdir')
 			echo $final_json > ~/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json
 			
 			# running chainner
-			~/Téléchargements/chaiNNer-linux-x64-0.20.2/chaiNNer-linux-x64/./chainner run ~/Documents/upchain  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
+			~/Téléchargements/chaiNNer-linux-x64/./chainner run ~/Documents/upscale_esr_24062024  --override "/home/loic/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
 			pid=$!
 			
 			# beautiful declaration UwU
@@ -164,7 +164,16 @@ do
 
 				if ! ps -p $pid > /dev/null; 
 				then
-					break
+					if [ $processed_file_count -lt $file_count ];
+					then
+						# re-running chainner
+						echo -ne "	${GRAY}Halted: [$processed_file_count/$file_count][ETA => $([[ $end_time_formatted = "" ]] && echo "... ${NC}" || echo "$end_time_formatted")${NC}]\r"
+						~/Téléchargements/chaiNNer-linux-x64/./chainner run ~/Documents/upscale_esr_24062024  --override "/home/loic/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
+						pid=$!
+					else
+						echo -ne "	Finalizing... [${GREEN}$processed_file_count${NC}/$file_count][ETA => ${GREEN}$([[ $end_time_formatted = "" ]] && echo "${RED}... ${NC}" || echo "$end_time_formatted")${NC}]\r"
+						break
+					fi
 				fi
 				
 				processing_time=$((processing_time + 1))
