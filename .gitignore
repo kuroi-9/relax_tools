@@ -1,2 +1,7 @@
 scripts/upscale_esr_library_14022024_inputs*
 scripts/upscale_esr_library_27122023_inputs*
+upscale/manga/tests/*
+
+!upscale/manga/tests/workers/
+!upscale/manga/workers/
+!upscale/manga/models/4x-eula-digimanga-bw-v2-nc1.pth
