@@ -45,7 +45,7 @@ diskUsableSpace=$(df --output=avail --block-size=1024 . | sed 1d)
 diskUsedSpace=0
 notEnoughSpace=false
 
-echo -e "|--------------------- $processedFiles of $filesCount ----------------------vPinkValentine"
+echo -e "|--------------------- $processedFiles of $filesCount ----------------------vFatal"
 
 # Processes all .cbz files of the current directory
 for cbz in *.cbz;
@@ -91,7 +91,7 @@ do
 			cg_path=$(dirname "${PWD}")
 			#rm -rf ~/Documents/manga_upscale/to_upscale/* > /dev/null 2>&1
 			file_count=$(ls -1 | wc -l)
-			mkdir ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
+			rm -rf ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" && mkdir ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
 			cd .. && rm -rf ../"${cbz%.*}"
 			
 			# preparing directory
@@ -130,7 +130,7 @@ do
 			# Second RESIZE TO SIDE element note :
 			# We should multiply 1814 by the following dividing (old screen height/new screen height)
 			# The result then should be multiplied by 4.
-			~/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_29062024  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json" > /dev/null 2>&1 &
+			~/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_29062024  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_14022024_inputs_latest.json"  > /dev/null 2>&1 &
 			pid=$!
 			
 			# beautiful declaration UwU
@@ -232,7 +232,7 @@ do
 	
 	# Display history at each iteration (= .cbz)
 	clear
-	echo -e "|--------------------- $processedFiles of $filesCount ----------------------vPinkValentine"
+	echo -e "|--------------------- $processedFiles of $filesCount ----------------------vFatal"
 	for value in "${history[@]}"
 	do	
 		echo -e $value
