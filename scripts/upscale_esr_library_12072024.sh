@@ -56,9 +56,9 @@ do
 	diskUsableSpace=$(df --output=avail --block-size=1024 . | sed 1d)
 	fileSize=$(ls -l --block-size=1024 "$cbz" | cut -d ' ' -f 5)
 	
-	if [ -d ~/Documents/manga_upscale/upscale_out/"${cbz%.*}" ];
+	if [ -d ~/Documents/Mangas/manga_upscale/upscale_out/"${cbz%.*}" ];
 	then
-		diskUsedSpace=$(du -s ~/Documents/manga_upscale/upscale_out/"${cbz%.*}" | cut -d '/' -f 1)
+		diskUsedSpace=$(du -s ~/Documents/Mangas/manga_upscale/upscale_out/"${cbz%.*}" | cut -d '/' -f 1)
 	fi
 	
 	mkdir "${cbz%.*}" >/dev/null 2>&1
@@ -89,15 +89,15 @@ do
 			find . \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.gif' \) -print0 | xargs -0 cp -t ci_temp
 			cd ci_temp
 			cg_path=$(dirname "${PWD}")
-			#rm -rf ~/Documents/manga_upscale/to_upscale/* > /dev/null 2>&1
+			#rm -rf ~/Documents/Mangas/manga_upscale/to_upscale/* > /dev/null 2>&1
 			file_count=$(ls -1 | wc -l)
-			rm -rf ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" && mkdir ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
+			rm -rf ~/Documents/Mangas/manga_upscale/to_upscale/"${cg_path##*/}" && mkdir ~/Documents/Mangas/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1 && mv * ~/Documents/Mangas/manga_upscale/to_upscale/"${cg_path##*/}" > /dev/null 2>&1
 			cd .. && rm -rf ../"${cbz%.*}"
 			
 			# preparing directory
-			cd ~/Documents/manga_upscale/to_upscale/"${PWD##*/}"
+			cd ~/Documents/Mangas/manga_upscale/to_upscale/"${PWD##*/}"
 			
-			if [ -d ~/Documents/manga_upscale/upscale_out/"${PWD##*/}" ];
+			if [ -d ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}" ];
 			then
 				for picture in *;
 				do
@@ -105,7 +105,7 @@ do
 					sub_extension=${sub_filename##*.}
 					sub_basename="${sub_filename%.*}"
 					
-					upscaled_file=~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/"$sub_basename".jpg
+					upscaled_file=~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/"$sub_basename".jpg
 					
 					# Do not processes upscale if output file already exists
 					if [ -f "$upscaled_file" ]; 
@@ -116,7 +116,7 @@ do
 					fi
 				done
 			else
-				mkdir ~/Documents/manga_upscale/upscale_out/"${PWD##*/}" > /dev/null 2>&1
+				mkdir ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}" > /dev/null 2>&1
 			fi
 
 			# preparing the input/output for chainner
@@ -137,7 +137,7 @@ do
 			spinner="/-\\|"
 			
 			processing_time=0
-			last_processed_file_count=$(ls -1 ~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
+			last_processed_file_count=$(ls -1 ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
 			average_processing_time=0
 			total_processing_time=0
 			current_processed_file_count=0
@@ -145,7 +145,7 @@ do
 			
 			while true; 
 			do
-				processed_file_count=$(ls -1 ~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
+				processed_file_count=$(ls -1 ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
 				remaining_files=$((file_count - processed_file_count))
 				
 				if [ "$processed_file_count" -gt "$last_processed_file_count" ];
@@ -186,12 +186,12 @@ do
 
 			end_time_formatted=""
 			doneWithErrors=$?
-			out_file_count=$(ls -1 ~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
+			out_file_count=$(ls -1 ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/ | wc -l)
 			
 			# Create different filename for alarming and $history purposes
 			if [ "$out_file_count" -eq "$file_count" -o "$out_file_count" -eq $((file_count - 1)) ];
 			then
-				zip -r "$workingDir"/out/"$cbz" ~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
+				zip -r "$workingDir"/out/"$cbz" ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
 				if [ -f "$workingDir"/out/"$cbz" ];
 				then
 					echo "zip process success"
@@ -199,7 +199,7 @@ do
 					echo "${RED}zip process failed, enough disk space ?${NC}"
 				fi
 			else
-				zip -r "$workingDir"/out/"$basename"_potential_errors.cbz ~/Documents/manga_upscale/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
+				zip -r "$workingDir"/out/"$basename"_potential_errors.cbz ~/Documents/Mangas/manga_upscale/upscale_out/"${PWD##*/}"/ > /dev/null 2>&1
 				if [ -f "$workingDir"/out/"$basename"_potential_errors.cbz ];
 				then
 					echo "zip process success"
@@ -208,7 +208,7 @@ do
 				fi
 			fi
 			
-			rm -rf ~/Documents/manga_upscale/to_upscale/"${PWD##*/}"
+			rm -rf ~/Documents/Mangas/manga_upscale/to_upscale/"${PWD##*/}"
 			rm -rf "${cbz%.*}"
 			cd "$workingDir"
 				
