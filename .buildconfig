@@ -1,0 +1,11 @@
+[Toggle Fluent theme]
+name=Toggle Fluent theme
+runtime=host
+toolchain=default
+config-opts=
+run-opts=
+prefix=
+app-id=
+postbuild=
+prebuild=
+run-command=/home/loicd/relax_tools/scripts/toggle_fluent_theme.sh

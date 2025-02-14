@@ -5,3 +5,5 @@ upscale/manga/tests/*
 !upscale/manga/tests/workers/
 !upscale/manga/workers/
 !upscale/manga/models/4x-eula-digimanga-bw-v2-nc1.pth
+
+scripts/anytype_key.txt
