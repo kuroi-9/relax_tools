@@ -292,5 +292,6 @@ do
 	#fi
 done
 
+#killall sshd
 #systemctl suspend
 #-sing my pleasure-

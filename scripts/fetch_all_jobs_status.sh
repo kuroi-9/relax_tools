@@ -21,7 +21,7 @@ do
 		running=false
 		completed=false
 
-		ps -p $last_pid -o comm=  > /dev/null 2>&1
+		ps -p $last_pid -o comm= > /dev/null 2>&1
 
 		if [ $? -eq 0 -o -f "$title_dir"/launcher.lock ];
 		then

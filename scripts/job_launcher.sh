@@ -29,6 +29,14 @@ if [[ -z "$path" ]]; then
   exit 1
 fi
 
+# Kill all previous process that may be still running
+for pid in $(ps axf | grep upscale_esr_lib | grep -v grep | awk '{print $1}'); do
+    kill -9 $pid
+done
+
+killall chainner > /dev/null 2>&1
+killall python3.11 > /dev/null 2>&1
+
 # Return pid
 titleName=$(cut -d "/" -f7 <<< "$path")
 touch /home/loicd/Documents/Mangas/manga_upscale/upscale_out/"${titleName}"/launcher.lock > /dev/null 2>&1 &
