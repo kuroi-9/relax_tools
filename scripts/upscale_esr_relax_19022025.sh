@@ -32,8 +32,16 @@ if [[ -z "$path" ]]; then
 fi
 
 # Kill all previous process that may be still running
-for pid in $(ps axf | grep upscale_esr_lib | grep -v grep | awk '{print $1}'); do
-    kill -9 $pid
+for title_dir in /home/loicd/Documents/Mangas/manga_upscale/upscale_out/*
+do
+	for dir in "$title_dir"/*
+	do
+		if [ -f "$title_dir"/last_pid ];
+		then
+			last_pid=$(cat "$title_dir"/last_pid)
+			kill -9 $last_pid > /dev/null 2>&1
+		fi
+	done
 done
 
 # Creating lockfile and echoing the PID to the API
@@ -60,7 +68,9 @@ for cbz in *.cbz; do
 	if [ -f "$file".cbz ]; then
 		processedFiles=$((processedFiles + 1))
 		rm -rf "${cbz%.*}"
-		touch ~/Documents/Mangas/manga_upscale/upscale_out/"${workingDir##*/}"/"${cbz%.*}"/completed.lock
+		mkdir ~/Documents/Mangas/manga_upscale/upscale_out/"${workingDir##*/}"/ > /dev/null 2>&1
+		mkdir ~/Documents/Mangas/manga_upscale/upscale_out/"${workingDir##*/}"/"${cbz%.*}"/ > /dev/null 2>&1
+		touch ~/Documents/Mangas/manga_upscale/upscale_out/"${workingDir##*/}"/"${cbz%.*}"/completed.lock > /dev/null 2>&1
 	elif [ -f "$file"_potential_errors.cbz ]; then
 		processedFiles=$((processedFiles + 1))
 		rm -rf "${cbz%.*}"
@@ -118,7 +128,7 @@ for cbz in *.cbz; do
 		# We should multiply 1814 by the following dividing (old screen height/new screen height)
 		# The result then should be multiplied by 4.
 		killall chainner >/dev/null 2>&1
-		~/Downloads/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_26012025.chn --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" >/dev/null 2>&1 &
+		/home/loicd/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_05052025.chn --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" >/dev/null 2>&1 &
 		pid=$!
 
 		# Beautiful declaration UwU
@@ -156,7 +166,7 @@ for cbz in *.cbz; do
 					killall chainner
 					killall python3.11
 					echo "[ERROR] Halted: [$processed_file_count/$file_count][ETA => $([[ $end_time_formatted = "" ]] && echo "..." || echo "$end_time_formatted")\r"
-					~/Downloads/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_26012025.chn --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" >/dev/null 2>&1 &
+					/home/loicd/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_05052025.chn --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" >/dev/null 2>&1 &
 					pid=$!
 				else
 					break

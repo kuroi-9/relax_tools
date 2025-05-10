@@ -5,7 +5,12 @@ do
 	for dir in "$title_dir"/*
 	do
 		dirname=${dir##*/}
-		dir_page_count=$(ls "$dir" | wc -l)
+		
+		if [ -d "$dir" ];
+		then
+			dir_page_count=$(ls "$dir" | wc -l)
+		fi
+		
 		if [ -f /home/loicd/Documents/Mangas/manga_upscale/upscale_out/"${title_dir##*/}"/"$dirname"/file_count ];
 		then
 			dir_total_page_count=$(cat /home/loicd/Documents/Mangas/manga_upscale/upscale_out/"${title_dir##*/}"/"$dirname"/file_count)

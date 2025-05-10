@@ -171,7 +171,7 @@ do
 			# We should multiply 1814 by the following dividing (old screen height/new screen height)
 			# The result then should be multiplied by 4.
 			killall chainner
-			~/Downloads/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_26012025.chn  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" > /dev/null 2>&1 &
+			/home/loicd/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_05052025.chn  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" > /dev/null 2>&1 &
 			pid=$!
 			
 			# beautiful declaration UwU
@@ -216,7 +216,7 @@ do
 						killall chainner
 						killall python3.11
 						echo -ne "	${GRAY}Halted: [$processed_file_count/$file_count][ETA => $([[ $end_time_formatted = "" ]] && echo "... ${NC}" || echo "$end_time_formatted")${NC}]\r"
-						~/Downloads/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_26012025.chn  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" > /dev/null 2>&1 &
+						/home/loicd/Téléchargements/chaiNNer-linux-x64/./chainner run /home/loicd/relax_tools/upscale/manga/workers/upscale_esr_05052025.chn  --override "/home/loicd/relax_tools/scripts/upscale_esr_library_26012025_inputs_latest.json" > /dev/null 2>&1 &
 						pid=$!
 					else
 						echo -ne "	Finalizing... [${GREEN}$processed_file_count${NC}/$file_count][ETA => ${GREEN}$([[ $end_time_formatted = "" ]] && echo "${RED}... ${NC}" || echo "$end_time_formatted")${NC}]\r"
