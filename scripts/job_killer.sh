@@ -30,8 +30,9 @@ fi
 
 # Process kill
 last_pid=$(cat /home/loicd/Documents/Mangas/manga_upscale/upscale_out/"$name"/last_pid)
+killall python3.11
 kill $last_pid
 killall chainner
-killall python3.11
+
 rm -rf ~/Documents/Mangas/manga_upscale/upscale_out/"$name"/launcher.lock
 echo $?
