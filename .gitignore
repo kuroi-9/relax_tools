@@ -1,5 +1,6 @@
 scripts/upscale_esr_library_14022024_inputs*
 scripts/upscale_esr_library_27122023_inputs*
+scripts/upscale_esr_library_26012025_inputs*
 upscale/manga/tests/*
 
 !upscale/manga/tests/workers/
